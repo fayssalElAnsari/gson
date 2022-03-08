@@ -205,4 +205,62 @@ static final class PostConstructAdapter<T> extends TypeAdapter<T> {
 --------------------
 
 
+### Emplacement
+`extras/src/main/java/com/google/gson/typeadapters/UtcDateTypeAdapter.java`
+
+### Snippet de code
+
+```java
+  @Override
+  public Date read(JsonReader in) throws IOException {
+    try {
+      switch (in.peek()) {
+      case NULL:
+        in.nextNull();
+        return null;
+      default:
+        String date = in.nextString();
+        // Instead of using iso8601Format.parse(value), we use Jackson's date parsing
+        // This is because Android doesn't support XXX because it is JDK 1.6
+        return parse(date, new ParsePosition(0));
+      }
+    } catch (ParseException e) {
+      throw new JsonParseException(e);
+    }
+  }
+```
+
+### Type
+`"switch" statements should have at least 3 "case" clauses`
+* Time: `5min`
+* Type: `Code Smell` `bad practice`
+* Severity: `Minor`
+
+### Snippet Apres Correction
+* Replace this "switch" statement by "if" statements to increase readability.
+
+```java
+@Override
+  public Date read(JsonReader in) throws IOException {
+    try {
+      if(in.peek() == NULL){
+        in.nextNull();
+        return null;
+      } else {
+        String date = in.nextString();
+        return parse(date, new ParsePosition(0));
+      } 
+    } catch (ParseException e) {
+      throw new JsonParseException(e);
+    }
+  }
+```
+
+### Notes
+* Meme si le code est fonctionnel c'est mieux de le modifier pour faciliter la lecture.
+--------------------
+
+
+
+
 
