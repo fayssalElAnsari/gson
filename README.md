@@ -2,6 +2,14 @@
 
 Ce dépôt contient la partie individuel du projet GL. Le projet choisis est Gson. Notre objectif est de contribuer a cet open-source projet.
 
+
+## TODO List
+* [ ] Analyze the project using different tools
+* [ ] Identify code snippets to improve, and code smells of different types
+* [ ] Order snippets by acending difficulty to improve and improtance
+* [ ] Do at least one type of improvement 
+
+
 ## Getting started
 
 To make it easy for you to get started with GitLab, here's a list of recommended next steps.
