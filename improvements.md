@@ -92,7 +92,7 @@ if (delta == -2) {
 ```
 
 ### Notes
-* Comme la version de java de ce projet est > 7. Ce n'est plus necessaire de explicite le type `<String, String>` dans la declaration et l'instanciation le compilateur peut inferer le type a partir de la declaration automatiquement.
+* Comme la version de java de ce projet est > 7. Ce n'est plus necessaire d'explicite le type `<String, String>` dans la declaration et l'instanciation le compilateur peut inferer le type a partir de la declaration automatiquement.
 -------------------
 
 ### Emplacement
@@ -142,5 +142,5 @@ void read(Graph graph) throws IllegalStateException {
 ```
 
 ### Notes
-* 
+* Ici c'est meme pas une class mere de l'exception qui peut etre envoyer dans le code. Donc il est necessaire de la modifier.
 --------------------
