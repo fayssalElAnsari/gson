@@ -144,3 +144,86 @@ void read(Graph graph) throws IllegalStateException {
 ### Notes
 * Ici c'est meme pas une class mere de l'exception qui peut etre envoyer dans le code. Donc il est necessaire de la modifier.
 --------------------
+
+### Emplacement
+`extras/src/main/java/com/google/gson/interceptors/InterceptorFactory.java`
+
+### Snippet de code
+
+```java
+    @SuppressWarnings("unchecked") // ?
+    public InterceptorAdapter(TypeAdapter<T> delegate, Intercept intercept) {
+      try {
+        this.delegate = delegate;
+        this.postDeserializer = intercept.postDeserialize().newInstance();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+```
+
+### Type
+`"@Deprecated" code should not be used`
+* Time: `5min`
+* Type: `Code Smell`
+* Severity: `Minor`
+
+### Snippet Apres Correction
+* Remove this use of "newInstance"; it is deprecated.
+clazz.newInstance()
+
+```java
+    @SuppressWarnings("unchecked") // ?
+    public InterceptorAdapter(TypeAdapter<T> delegate, Intercept intercept) {
+      try {
+        this.delegate = delegate;
+        this.postDeserializer = intercept.postDeserialize().getDeclaredConstructor().newInstance();
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+```
+
+### Notes
+* D'apres la documentation de java 9. Au lieu d'utiliser `nomClass.newInstance();` faut utiliser `nomClass.getDeclaredConstructor().newInstance();`
+--------------------
+
+
+### Emplacement
+`extras/src/main/java/com/google/gson/typeadapters/PostConstructAdapterFactory.java`
+
+### Snippet de code
+
+```java
+    final static class PostConstructAdapter<T> extends TypeAdapter<T> {
+        private final TypeAdapter<T> delegate;
+        private final Method method;
+        ...
+        ..
+        .
+```
+
+### Type
+`"Modifiers should be declared in the correct order`
+* Time: `2min`
+* Type: `Code Smell`
+* Severity: `Minor`
+
+### Snippet Apres Correction
+* Reorder the modifiers to comply with the Java Language Specification
+
+```java
+static final class PostConstructAdapter<T> extends TypeAdapter<T> {
+        private final TypeAdapter<T> delegate;
+        private final Method method;
+        ...
+        ..
+        .
+```
+
+### Notes
+* Meme si le code est fonctionnel c'est mieux de le modifier pour faciliter la lecture.
+--------------------
+
+
+
