@@ -8,7 +8,7 @@ Ce dépôt contient la partie individuel du projet GL. Le projet choisis est Gso
 * [ ] Identify code snippets to improve, and code smells of different types
 * [ ] Order snippets by acending difficulty to improve and improtance
 * [ ] Do at least one type of improvement 
-
+* [ ] Push each modification individually to master project to get some feedback 
 
 ## Getting started
 
