@@ -5,48 +5,29 @@
 
 ```java
 private void rebalance(Node<K, V> unbalanced, boolean insert) {
-
     for (Node<K, V> node = unbalanced; node != null; node = node.parent) {
-
       Node<K, V> left = node.left;
-
       Node<K, V> right = node.right;
 
       int leftHeight = left != null ? left.height : 0;
-
-      int rightHeight = 
-
-right != null ? right.height : 0;
-
+      int rightHeight = right != null ? right.height : 0;
       int delta = leftHeight - rightHeight;
 
       if (delta == -2) {
-
-        Node<K, V> rightLeft = 
-
-right.left;
-
+        Node<K, V> rightLeft = right.left;
         Node<K, V> rightRight = right.right;
-
         int rightRightHeight = rightRight != null ? rightRight.height : 0;
-
         int rightLeftHeight = rightLeft != null ? rightLeft.height : 0;
-
         int rightDelta = rightLeftHeight - rightRightHeight;
-
         if (rightDelta == -1 || (rightDelta == 0 && !insert)) {
-
           rotateLeft(node); // AVL right right
-
         } else {
-
           assert (rightDelta == 1);
 ```
 
 ### Type 
-`A "NullPointerException" could be thrown; "right" is nullable here.
-L322
-10min effort`
+`A "NullPointerException" could be thrown; "right" is nullable here.`  
+* Time: `10min`
 * Type: `Bug`
 * Severity: `Major`
 ### Snippet Apres Correction
@@ -74,12 +55,11 @@ if (delta == -2) {
 
 ```java
   /** Map fully qualified type names to their short names. */
-
   private final Map<String, String> importedTypes = new HashMap<String, String>();
 ```
 
 ### Type
-`Replace the type specification in this constructor call with the diamond operator ("<>").`
+`Replace the type specification in this constructor call with the diamond operator ("<>").`  
 * Time: `1min`
 * Type: `Code Smell`
 * Severity: `Minor`
@@ -87,7 +67,6 @@ if (delta == -2) {
 ### Snippet Apres Correction
 ```java
   /** Map fully qualified type names to their short names. */
-
   private final Map<String, String> importedTypes = new HashMap<>();
 ```
 
