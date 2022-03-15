@@ -371,7 +371,9 @@ public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
 ```
 
 ### Notes
-* Les conditions d'arrêt de boucle "for" doivent être invariantes.
+* Il est déroutant d'avoir un membre de classe portant le même nom (différences de casse mises à part) que sa classe englobante. C'est particulièrement le cas lorsque vous considérez la pratique courante consistant à nommer une instance de classe pour la classe elle-même.
+
+* La meilleure pratique dicte que tout champ ou membre portant le même nom que la classe englobante soit renommé pour être plus descriptif de l'aspect particulier de la classe qu'il représente ou contient.
 --------------------
 
 
