@@ -261,6 +261,44 @@ static final class PostConstructAdapter<T> extends TypeAdapter<T> {
 --------------------
 
 
+### Emplacement
+`codegen/src/main/java/com/google/gson/codegen/GeneratedTypeAdapterProcessor.java`
+
+### Snippet de code
+
+```java
+public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
+  @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
+    System.out.println("invoked GeneratedTypeAdapterProcessor");
+```
+
+### Type
+`Standard outputs should not be used directly to log anything`
+* Time: `10min`
+* Type: `Code Smell` `bad practice`
+* Severity: `Major`
+
+### Snippet Apres Correction
+* Replace this use of System.out or System.err by a logger.
+
+```java
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+...
+..
+.
+public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
+  @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
+    // Create a Logger
+    Logger logger = Logger.getLogger(GFG.class.getName());
+    logger.log(Level.INFO, "invoked GeneratedTypeAdapterProcessor");
+```
+
+### Notes
+* Si un programme écrit directement sur `la sortie standard`, il n'y a absolument aucun moyen de se conformer à ces exigences. C'est pourcela il est fortement recommandé de définir et d'utiliser un `logger` dédié.
+--------------------
+
 
 
 
