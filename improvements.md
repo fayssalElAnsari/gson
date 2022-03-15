@@ -300,5 +300,45 @@ public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
 --------------------
 
 
+### Emplacement
+`codegen/src/main/java/com/google/gson/codegen/JavaWriter.java`
+
+### Snippet de code
+```java
+    for (int p = 0; p < parameters.length; ) {
+      if (p != 0) {
+        out.write(", ");
+      }
+      type(parameters[p++]);
+      out.write(" ");
+      type(parameters[p++]);
+    }
+```
+
+### Type
+`Standard outputs should not be used directly to log anything`
+* Time: `10min`
+* Type: `Code Smell` `pitfall`
+* Severity: `Major`
+
+### Snippet Apres Correction
+* Refactor the code in order to not assign to this loop counter from within the loop body.
+
+```java
+    for (int p = 0; p < parameters.length; p = p+2) {
+      if (p != 0) {
+        out.write(", ");
+      }
+      type(parameters[p]);
+      out.write(" ");
+      type(parameters[p+1]);
+    }
+```
+
+### Notes
+* Les conditions d'arrêt de boucle "for" doivent être invariantes.
+--------------------
+
+
 
 
