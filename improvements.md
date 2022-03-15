@@ -377,6 +377,45 @@ public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
 --------------------
 
 
+### Emplacement
+`extras/src/main/java/com/google/gson/typeadapters/PostConstructAdapterFactory.java`
+
+### Snippet de code
+```java
+  @Override
+  public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+      for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
+          for (Method m : t.getDeclaredMethods()) {
+              if (m.isAnnotationPresent(PostConstruct.class)) {
+                  m.setAccessible(true); //here
+```
+
+### Type
+`Reflection should not be used to increase accessibility of classes, methods, or fields`
+* Time: `30min`
+* Type: `Code Smell` `cert`
+* Severity: `Major`
+
+### Snippet Apres Correction
+* This accessibility update should be removed.
+
+```java
+  //////////////// TODO //////////////
+  @Override
+  public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+      for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
+          for (Method m : t.getDeclaredMethods()) {
+              if (m.isAnnotationPresent(PostConstruct.class)) {
+                  m.setAccessible(true); //here
+  //////////////// TODO //////////////
+```
+
+### Notes
+* Cette règle pose un problème lorsque la réflexion est utilisée pour modifier la visibilité d'une classe, d'une méthode ou d'un champ, et lorsqu'elle est utilisée pour mettre à jour directement une valeur de champ. La modification ou le contournement de l'accessibilité des classes, des méthodes ou des champs enfreint le principe d'encapsulation et peut entraîner des erreurs d'exécution.
+--------------------
+
+
+
 
 
 
