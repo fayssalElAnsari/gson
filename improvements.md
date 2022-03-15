@@ -340,5 +340,45 @@ public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
 --------------------
 
 
+### Emplacement
+`extras/src/main/java/com/google/gson/graph/GraphAdapterBuilder.java`
+
+### Snippet de code
+```java
+    /**
+     * The element to deserialize. Unused in serialization.
+     */
+    private final JsonElement element;
+```
+
+### Type
+`A field should not duplicate the name of its containing class`
+* Time: `10min`
+* Type: `Code Smell` `brain-overload`
+* Severity: `Major`
+
+### Snippet Apres Correction
+* Rename field "element"
+
+```java
+    /**
+     * The element to deserialize. Unused in serialization.
+     */
+    private final JsonElement jsonElement;
+    /**
+    *   NEED TO REFACTOR ALL INSTANCES OF 'element' IN THE CODE
+    */
+```
+
+### Notes
+* Les conditions d'arrêt de boucle "for" doivent être invariantes.
+--------------------
+
+
+
+
+
+
+
 
 
