@@ -25,12 +25,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Properties;
+import java.util.*;
 
 import static com.google.gson.internal.$Gson$Preconditions.checkArgument;
 import static com.google.gson.internal.$Gson$Preconditions.checkNotNull;
@@ -163,8 +158,8 @@ public final class $Gson$Types {
     }
   }
 
-  static boolean equal(Object a, Object b) {
-    return a == b || (a != null && a.equals(b));
+  static boolean isEqual(Object a, Object b) {
+    return Objects.equals(a, b);
   }
 
   /**
@@ -174,43 +169,51 @@ public final class $Gson$Types {
     if (a == b) {
       // also handles (a == null && b == null)
       return true;
-
     } else if (a instanceof Class) {
       // Class already specifies equals().
       return a.equals(b);
+    } else return equalsParametrizedType(a, b);
+  }
 
-    } else if (a instanceof ParameterizedType) {
+  public static boolean equalsParametrizedType(Type a, Type b){
+    if (a instanceof ParameterizedType) {
       if (!(b instanceof ParameterizedType)) {
         return false;
       }
-
       // TODO: save a .clone() call
       ParameterizedType pa = (ParameterizedType) a;
       ParameterizedType pb = (ParameterizedType) b;
-      return equal(pa.getOwnerType(), pb.getOwnerType())
+      return isEqual(pa.getOwnerType(), pb.getOwnerType())
           && pa.getRawType().equals(pb.getRawType())
           && Arrays.equals(pa.getActualTypeArguments(), pb.getActualTypeArguments());
+    } else return equalsGenericArrayType(a, b);
+  }
 
-    } else if (a instanceof GenericArrayType) {
+  public static boolean equalsGenericArrayType(Type a, Type b){
+    if (a instanceof GenericArrayType) {
       if (!(b instanceof GenericArrayType)) {
         return false;
       }
-
       GenericArrayType ga = (GenericArrayType) a;
       GenericArrayType gb = (GenericArrayType) b;
       return equals(ga.getGenericComponentType(), gb.getGenericComponentType());
+    } else return equalsWildcardType(a, b);
+  }
 
-    } else if (a instanceof WildcardType) {
+  public static boolean equalsWildcardType(Type a, Type b){
+      if (a instanceof WildcardType) {
       if (!(b instanceof WildcardType)) {
         return false;
       }
-
       WildcardType wa = (WildcardType) a;
       WildcardType wb = (WildcardType) b;
       return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds())
           && Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
+    } else return equalsTypeVariable(a, b);
+  }
 
-    } else if (a instanceof TypeVariable) {
+  public static boolean equalsTypeVariable(Type a, Type b){
+    if (a instanceof TypeVariable) {
       if (!(b instanceof TypeVariable)) {
         return false;
       }
@@ -218,7 +221,6 @@ public final class $Gson$Types {
       TypeVariable<?> vb = (TypeVariable<?>) b;
       return va.getGenericDeclaration() == vb.getGenericDeclaration()
           && va.getName().equals(vb.getName());
-
     } else {
       // This isn't a type we support. Could be a generic array type, wildcard type, etc.
       return false;
@@ -371,7 +373,7 @@ public final class $Gson$Types {
         Class<?> original = (Class<?>) toResolve;
         Type componentType = original.getComponentType();
         Type newComponentType = resolve(context, contextRawType, componentType, visitedTypeVariables);
-        toResolve = equal(componentType, newComponentType)
+        toResolve = isEqual(componentType, newComponentType)
             ? original
             : arrayOf(newComponentType);
         break;
@@ -380,7 +382,7 @@ public final class $Gson$Types {
         GenericArrayType original = (GenericArrayType) toResolve;
         Type componentType = original.getGenericComponentType();
         Type newComponentType = resolve(context, contextRawType, componentType, visitedTypeVariables);
-        toResolve = equal(componentType, newComponentType)
+        toResolve = isEqual(componentType, newComponentType)
             ? original
             : arrayOf(newComponentType);
         break;
@@ -389,12 +391,12 @@ public final class $Gson$Types {
         ParameterizedType original = (ParameterizedType) toResolve;
         Type ownerType = original.getOwnerType();
         Type newOwnerType = resolve(context, contextRawType, ownerType, visitedTypeVariables);
-        boolean changed = !equal(newOwnerType, ownerType);
+        boolean changed = !isEqual(newOwnerType, ownerType);
 
         Type[] args = original.getActualTypeArguments();
         for (int t = 0, length = args.length; t < length; t++) {
           Type resolvedTypeArgument = resolve(context, contextRawType, args[t], visitedTypeVariables);
-          if (!equal(resolvedTypeArgument, args[t])) {
+          if (!isEqual(resolvedTypeArgument, args[t])) {
             if (!changed) {
               args = args.clone();
               changed = true;

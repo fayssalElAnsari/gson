@@ -1,1 +1,1 @@
-mvn clean verify sonar:sonar -Dsonar.projectKey=gson_resurrection -Dsonar.host.url=http://localhost:9000 -Dsonar.login=840db6fded6390e6dbf1a09b757e01be386c6782
+mvn clean verify sonar:sonar -Dsonar.projectKey=Gson-github -Dsonar.host.url=http://localhost:9000 -Dsonar.login=840db6fded6390e6dbf1a09b757e01be386c6782

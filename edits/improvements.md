@@ -390,11 +390,11 @@ public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
 ### Snippet de code
 ```java
   @Override
-  public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-      for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
-          for (Method m : t.getDeclaredMethods()) {
-              if (m.isAnnotationPresent(PostConstruct.class)) {
-                  m.setAccessible(true); //here
+public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+        for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
+        for (Method m : t.getDeclaredMethods()) {
+        if (m.isAnnotationPresent(PostConstruct.class)) {
+        m.setAccessible(true); //here
 ```
 
 ### Type
@@ -408,19 +408,325 @@ public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
 
 ```java
   //////////////// TODO //////////////
-  @Override
-  public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-      for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
-          for (Method m : t.getDeclaredMethods()) {
-              if (m.isAnnotationPresent(PostConstruct.class)) {
-                  m.setAccessible(true); //here
-  //////////////// TODO //////////////
+@Override
+public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+        for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
+        for (Method m : t.getDeclaredMethods()) {
+        if (m.isAnnotationPresent(PostConstruct.class)) {
+        m.setAccessible(true); //here
+//////////////// TODO //////////////
 ```
 [ ] Modifiee et testee
 
 ### Notes
 * Cette règle pose un problème lorsque la réflexion est utilisée pour modifier la visibilité d'une classe, d'une méthode ou d'un champ, et lorsqu'elle est utilisée pour mettre à jour directement une valeur de champ. La modification ou le contournement de l'accessibilité des classes, des méthodes ou des champs enfreint le principe d'encapsulation et peut entraîner des erreurs d'exécution.
 --------------------
+
+
+
+### Emplacement
+`gson/src/main/java/com/google/gson/internal/$Gson$Types.java`
+
+### Snippet de code
+```java
+  static boolean equal(Object a, Object b) {
+    return a == b || (a != null && a.equals(b));
+  }
+```
+
+### Type
+`Methods should not be named "tostring", "hashcode" or "equal" `
+* Time: `10min`
+* Type: `Code Smell` `pitfall`
+* Severity: `Major`
+
+### Snippet Apres Correction
+* Either override `Object.equals(Object obj)`, or totally rename the method to prevent any confusion.
+
+```java
+  static boolean isEqual(Object a, Object b) {
+    return a == b || (a != null && a.equals(b));
+  }
+```
+[x] Modifiee et testee
+
+### Notes
+* On a fais un `refactor` au lieu de renomage apres la recherche du mot-cle. Par ce que c'est possible que cette methode `equal` soit utilise dans plusieurs fichiers non ouverts.
+* Comme la fonctionalite de la methode `equal()` n'est pas exactement la meme de `equals()` predifinis, c'est mieux de ne pas faire un `@override` de cette methode.
+* On a choisis le nouveau nom `isEqual()`
+--------------------
+
+
+
+### Emplacement
+`gson/src/main/java/com/google/gson/internal/$Gson$Types.java`
+
+### Snippet de code
+```java
+  /**
+   * Returns true if {@code a} and {@code b} are equal.
+   */
+  public static boolean equals(Type a, Type b) {
+    if (a == b) {
+      // also handles (a == null && b == null)
+      return true;
+    } else if (a instanceof Class) {
+      // Class already specifies equals().
+      return a.equals(b);
+    } else if (a instanceof ParameterizedType) {
+      if (!(b instanceof ParameterizedType)) {
+        return false;
+      }
+      // TODO: save a .clone() call
+      ParameterizedType pa = (ParameterizedType) a;
+      ParameterizedType pb = (ParameterizedType) b;
+      return isEqual(pa.getOwnerType(), pb.getOwnerType())
+          && pa.getRawType().equals(pb.getRawType())
+          && Arrays.equals(pa.getActualTypeArguments(), pb.getActualTypeArguments());
+    } else if (a instanceof GenericArrayType) {
+      if (!(b instanceof GenericArrayType)) {
+        return false;
+      }
+      GenericArrayType ga = (GenericArrayType) a;
+      GenericArrayType gb = (GenericArrayType) b;
+      return equals(ga.getGenericComponentType(), gb.getGenericComponentType());
+    } else if (a instanceof WildcardType) {
+      if (!(b instanceof WildcardType)) {
+        return false;
+      }
+      WildcardType wa = (WildcardType) a;
+      WildcardType wb = (WildcardType) b;
+      return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds())
+          && Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
+    } else if (a instanceof TypeVariable) {
+      if (!(b instanceof TypeVariable)) {
+        return false;
+      }
+      TypeVariable<?> va = (TypeVariable<?>) a;
+      TypeVariable<?> vb = (TypeVariable<?>) b;
+      return va.getGenericDeclaration() == vb.getGenericDeclaration()
+          && va.getName().equals(vb.getName());
+    } else {
+      // This isn't a type we support. Could be a generic array type, wildcard type, etc.
+      return false;
+    }
+  }
+```
+
+### Type
+`Cognitive Complexity of methods should not be too high`
+* Time: `1h`
+* Type: `Code Smell` `brain-overload`
+* Severity: `Major`
+
+### Snippet Apres Correction
+* Refactor this method to reduce its Cognitive Complexity from 18 to the 15 allowed.
+
+```java
+  /**
+   * Returns true if {@code a} and {@code b} are equal.
+   */
+  public static boolean equals(Type a, Type b) {
+    if (a == b) {
+      // also handles (a == null && b == null)
+      return true;
+    } else if (a instanceof Class) {
+      // Class already specifies equals().
+      return a.equals(b);
+    } else return equalsParametrizedType(a, b)
+  }
+
+  public static boolean equalsParametrizedType(Type a, Type b){
+    if (a instanceof ParameterizedType) {
+      if (!(b instanceof ParameterizedType)) {
+        return false;
+      }
+      // TODO: save a .clone() call
+      ParameterizedType pa = (ParameterizedType) a;
+      ParameterizedType pb = (ParameterizedType) b;
+      return isEqual(pa.getOwnerType(), pb.getOwnerType())
+          && pa.getRawType().equals(pb.getRawType())
+          && Arrays.equals(pa.getActualTypeArguments(), pb.getActualTypeArguments());
+    } else return equalsGenericArrayType(a, b)
+  }
+
+  public static boolean equalsGenericArrayType(Type a, Type b){
+    if (a instanceof GenericArrayType) {
+      if (!(b instanceof GenericArrayType)) {
+        return false;
+      }
+      GenericArrayType ga = (GenericArrayType) a;
+      GenericArrayType gb = (GenericArrayType) b;
+      return equals(ga.getGenericComponentType(), gb.getGenericComponentType());
+    } else return equalsWildcardType(a, b);
+  }
+
+  public static boolean equalsWildcardType(Type a, Type b){
+      if (a instanceof WildcardType) {
+      if (!(b instanceof WildcardType)) {
+        return false;
+      }
+      WildcardType wa = (WildcardType) a;
+      WildcardType wb = (WildcardType) b;
+      return Arrays.equals(wa.getUpperBounds(), wb.getUpperBounds())
+          && Arrays.equals(wa.getLowerBounds(), wb.getLowerBounds());
+    } else return equalsTypeVariable(a, b);
+  }
+
+  public static boolean equalsTypeVariable(Type a, Type b){
+    if (a instanceof TypeVariable) {
+      if (!(b instanceof TypeVariable)) {
+        return false;
+      }
+      TypeVariable<?> va = (TypeVariable<?>) a;
+      TypeVariable<?> vb = (TypeVariable<?>) b;
+      return va.getGenericDeclaration() == vb.getGenericDeclaration()
+          && va.getName().equals(vb.getName());
+    } else {
+      // This isn't a type we support. Could be a generic array type, wildcard type, etc.
+      return false;
+    }
+  }
+
+```
+[x] Modifiee et testee
+ 
+### Notes
+* Ici on a plusieurs cas pour verifier l'egualite des deux types `A` et `B`.
+* La fonction equals definis utilise des `if` `else` imbriquee pour chaque cas parmis: `null`, `ParameterizedType`, `GenericArrayType`, `WildcardType`.
+* Une des solutions possibles est de cree une fonction intermediaire pour chaque cas de type.
+* Chaque fontion renvoie un `boolean`
+* Chaque fonction et appeler seulement si celle en avant renvoie un `false`.
+--------------------
+
+
+
+### Emplacement
+`gson/src/main/java/com/google/gson/internal/$Gson$Types.java`
+
+### Snippet de code
+```java
+  public static Type resolve(Type context, Class<?> contextRawType, Type toResolve) {
+    return resolve(context, contextRawType, toResolve, new HashMap<TypeVariable<?>, Type>());
+  }
+```
+
+### Type
+`The diamond operator ("<>") should be used`
+* Time: `1min`
+* Type: `Code Smell` `clumsy`
+* Severity: `Minor`
+
+### Snippet Apres Correction
+* Replace the type specification in this constructor call with the diamond operator ("<>").
+
+```java
+  /*** NO CAN DO ***/
+```
+ 
+### Notes
+* Dans ce cas c'est un `faux positive`, il est impossible de modifier cette partie du code sans produire une erreur ou augmenter le taux des `codes smells`. 
+* L'information donner par `HashMap<TypeVariable<?>, Type>()` est necessaire a avoir.
+* Si on supprime ce que se trouve a l'interieur des `<..>` il y aura une erreur de compilation.
+  * C'est pas necessaire de modifier cette snippet de code, mais ca aide a rendre le code plus lisible et facile a comprendre.
+  * A partir de java 7 c'est plus necessaire de defenir le type dans le `operator diamond`
+--------------------
+
+
+### (2 codes smells dans un seul block)
+### Emplacement 
+`gson/src/main/java/com/google/gson/internal/$Gson$Types.java`
+
+### Snippet de code
+```java
+  public static Type resolve(Type context, Class<?> contextRawType, Type toResolve) {
+  private static Type resolve(Type context, Class<?> contextRawType, Type toResolve,
+              Map<TypeVariable<?>, Type> visitedTypeVariables) {
+    // this implementation is made a little more complicated in an attempt to avoid object-creation
+    TypeVariable<?> resolving = null;
+    while (true) {
+      if (toResolve instanceof TypeVariable) {
+        TypeVariable<?> typeVariable = (TypeVariable<?>) toResolve;
+        Type previouslyResolved = visitedTypeVariables.get(typeVariable);
+        if (previouslyResolved != null) {
+          // cannot reduce due to infinite recursion
+          return (previouslyResolved == Void.TYPE) ? toResolve : previouslyResolved;
+        }
+        // Insert a placeholder to mark the fact that we are in the process of resolving this type
+        visitedTypeVariables.put(typeVariable, Void.TYPE);
+        if (resolving == null) {
+          resolving = typeVariable;
+    }
+  ...
+  ..
+  .
+```
+
+### Type
+`Cognitive Complexity of methods should not be too high`
+* Time: `46min`
+* Type: `Code Smell` `brain-overload`
+* Severity: `Major`
+
+``
+`Loops should not contain more than a single "break" or "continue" statement`
+* Time: `2h20min`
+* Type: `Code Smell` `brain-overload`
+* Severity: `Minor`
+
+### Snippet Apres Correction
+* Refactor this method to reduce its Cognitive Complexity from 56 to the 15 allowed.
+* Reduce the total number of break and continue statements in this loop to use at most one.
+
+```java
+  /*** NO CAN DO ***/
+```
+
+ 
+### Notes
+* On peut voir dans cette partie un commentaire: `this implementation is made a little more complicated in an attempt to avoid object-creation` c'est a dire que le developeur a fait expres d'augmenter la complexite cognitive, pour eviter de cree des objets.
+* Donc dans ce cas c'est pas vraiment un `faux positive` mais on va pas le corriger.
+* On peut changer le status de ce code smell de `open` vers `won't fix` en ajoutant comme comentaire le commentaire du devlepeur laisser dans le block du code.
+--------------------
+
+
+
+### Emplacement
+`gson/src/main/java/com/google/gson/internal/bind/JsonTreeReader.java`
+
+### Snippet de code
+```java
+  @Override
+public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+        for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
+        for (Method m : t.getDeclaredMethods()) {
+        if (m.isAnnotationPresent(PostConstruct.class)) {
+        m.setAccessible(true); //here
+```
+
+### Type
+`Reflection should not be used to increase accessibility of classes, methods, or fields`
+* Time: `30min`
+* Type: `Code Smell` `cert`
+* Severity: `Major`
+
+### Snippet Apres Correction
+* This accessibility update should be removed.
+
+```java
+  //////////////// TODO //////////////
+@Override
+public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
+        for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
+        for (Method m : t.getDeclaredMethods()) {
+        if (m.isAnnotationPresent(PostConstruct.class)) {
+        m.setAccessible(true); //here
+//////////////// TODO //////////////
+```
+[ ] Modifiee et testee
+
+### Notes
+* Cette règle pose un problème lorsque la réflexion est utilisée pour modifier la visibilité d'une classe, d'une méthode ou d'un champ, et lorsqu'elle est utilisée pour mettre à jour directement une valeur de champ. La modification ou le contournement de l'accessibilité des classes, des méthodes ou des champs enfreint le principe d'encapsulation et peut entraîner des erreurs d'exécution.
 
 
 
