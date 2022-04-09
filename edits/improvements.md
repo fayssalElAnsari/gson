@@ -696,37 +696,77 @@ public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
 
 ### Snippet de code
 ```java
-  @Override
-public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-        for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
-        for (Method m : t.getDeclaredMethods()) {
-        if (m.isAnnotationPresent(PostConstruct.class)) {
-        m.setAccessible(true); //here
+  private String getPath(boolean usePreviousPath) {
+    StringBuilder result = new StringBuilder().append('$');
+    for (int i = 0; i < stackSize; i++) {
+      if (stack[i] instanceof JsonArray) {
+        if (++i < stackSize && stack[i] instanceof Iterator) {
+          int pathIndex = pathIndices[i];
+          // If index is last path element it points to next array element; have to decrement
+          // `- 1` covers case where iterator for next element is on stack
+          // `- 2` covers case where peek() already pushed next element onto stack
+          if (usePreviousPath && pathIndex > 0 && (i == stackSize - 1 || i == stackSize - 2)) {
+            pathIndex--;
+          }
+          result.append('[').append(pathIndex).append(']');
+        }
+      } else if (stack[i] instanceof JsonObject) {
+        if (++i < stackSize && stack[i] instanceof Iterator) {
+          result.append('.');
+          if (pathNames[i] != null) {
+            result.append(pathNames[i]);
+          }
+        }
+      }
+    }
+    return result.toString();
+  }
 ```
 
 ### Type
-`Reflection should not be used to increase accessibility of classes, methods, or fields`
+`Child class methods named for parent class methods should be overrides`
 * Time: `30min`
-* Type: `Code Smell` `cert`
+* Type: `Code Smell` `pitfall`
 * Severity: `Major`
 
 ### Snippet Apres Correction
-* This accessibility update should be removed.
+* Rename this method; there is a "private" method in the parent class with the same name.
 
 ```java
-  //////////////// TODO //////////////
-@Override
-public <T> TypeAdapter<T> create(Gson gson, TypeToken<T> type) {
-        for (Class<?> t = type.getRawType(); (t != Object.class) && (t.getSuperclass() != null); t = t.getSuperclass()) {
-        for (Method m : t.getDeclaredMethods()) {
-        if (m.isAnnotationPresent(PostConstruct.class)) {
-        m.setAccessible(true); //here
-//////////////// TODO //////////////
+  private String getThePath(boolean usePreviousPath) {
+    StringBuilder result = new StringBuilder().append('$');
+    for (int i = 0; i < stackSize; i++) {
+      if (stack[i] instanceof JsonArray) {
+        if (++i < stackSize && stack[i] instanceof Iterator) {
+          int pathIndex = pathIndices[i];
+          // If index is last path element it points to next array element; have to decrement
+          // `- 1` covers case where iterator for next element is on stack
+          // `- 2` covers case where peek() already pushed next element onto stack
+          if (usePreviousPath && pathIndex > 0 && (i == stackSize - 1 || i == stackSize - 2)) {
+            pathIndex--;
+          }
+          result.append('[').append(pathIndex).append(']');
+        }
+      } else if (stack[i] instanceof JsonObject) {
+        if (++i < stackSize && stack[i] instanceof Iterator) {
+          result.append('.');
+          if (pathNames[i] != null) {
+            result.append(pathNames[i]);
+          }
+        }
+      }
+    }
+    return result.toString();
+  }
 ```
-[ ] Modifiee et testee
+[x] Modifiee et testee
 
 ### Notes
-* Cette règle pose un problème lorsque la réflexion est utilisée pour modifier la visibilité d'une classe, d'une méthode ou d'un champ, et lorsqu'elle est utilisée pour mettre à jour directement une valeur de champ. La modification ou le contournement de l'accessibilité des classes, des méthodes ou des champs enfreint le principe d'encapsulation et peut entraîner des erreurs d'exécution.
+* Comme la fonction de la classe mere est privee on peut pas `@Override`
+* Il suffit de modifier le nom de le methode, on a choisis de la rendre `getThePath`
+* On a fais un `refactor` au lieu de renomage apres la recherche du mot-cle. Par ce que c'est possible que cette methode `getPath` soit utilise dans plusieurs fichiers non ouverts.
+* Comme la fonctionalite de la methode `equal()` n'a pas exactement la meme definition que celle de la classe mere on pas surcharger cette methode. 
+
 
 
 
