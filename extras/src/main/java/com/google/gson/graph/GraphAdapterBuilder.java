@@ -284,13 +284,13 @@ public final class GraphAdapterBuilder {
     /**
      * The element to deserialize. Unused in serialization.
      */
-    private final JsonElement element;
+    private final JsonElement jsonElement;
 
     Element(T value, String id, TypeAdapter<T> typeAdapter, JsonElement element) {
       this.value = value;
       this.id = id;
       this.typeAdapter = typeAdapter;
-      this.element = element;
+      this.jsonElement = element;
     }
 
     void write(JsonWriter out) throws IOException {
@@ -302,9 +302,9 @@ public final class GraphAdapterBuilder {
         throw new IllegalStateException("Unexpected recursive call to read() for " + id);
       }
       graph.nextCreate = this;
-      value = typeAdapter.fromJsonTree(element);
+      value = typeAdapter.fromJsonTree(jsonElement);
       if (value == null) {
-        throw new IllegalStateException("non-null value deserialized to null: " + element);
+        throw new IllegalStateException("non-null value deserialized to null: " + jsonElement);
       }
     }
   }

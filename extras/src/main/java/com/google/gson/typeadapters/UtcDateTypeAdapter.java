@@ -46,20 +46,18 @@ public final class UtcDateTypeAdapter extends TypeAdapter<Date> {
   @Override
   public Date read(JsonReader in) throws IOException {
     try {
-      switch (in.peek()) {
-      case NULL:
+      if(in.peek() == null){
         in.nextNull();
         return null;
-      default:
+      } else {
         String date = in.nextString();
-        // Instead of using iso8601Format.parse(value), we use Jackson's date parsing
-        // This is because Android doesn't support XXX because it is JDK 1.6
         return parse(date, new ParsePosition(0));
-      }
+      } 
     } catch (ParseException e) {
       throw new JsonParseException(e);
     }
   }
+
 
   // Date parsing code from Jackson databind ISO8601Utils.java
   // https://github.com/FasterXML/jackson-databind/blob/master/src/main/java/com/fasterxml/jackson/databind/util/ISO8601Utils.java

@@ -35,10 +35,10 @@ public final class JavaWriter {
   private static final String INDENT = "  ";
 
   /** Map fully qualified type names to their short names. */
-  private final Map<String, String> importedTypes = new HashMap<String, String>();
+  private final Map<String, String> importedTypes = new HashMap<>();
 
   private String packagePrefix;
-  private final List<Scope> scopes = new ArrayList<Scope>();
+  private final List<Scope> scopes = new ArrayList<>();
   private final Writer out;
 
   /**
@@ -222,13 +222,13 @@ public final class JavaWriter {
       type(name);
     }
     out.write("(");
-    for (int p = 0; p < parameters.length; ) {
+    for (int p = 0; p < parameters.length; p = p+2) {
       if (p != 0) {
         out.write(", ");
       }
-      type(parameters[p++]);
+      type(parameters[p]);
       out.write(" ");
-      type(parameters[p++]);
+      type(parameters[p+1]);
     }
     out.write(")");
     if ((modifiers & Modifier.ABSTRACT) != 0) {

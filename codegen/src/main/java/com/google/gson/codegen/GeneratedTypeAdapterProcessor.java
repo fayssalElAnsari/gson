@@ -30,12 +30,16 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 
 @SupportedAnnotationTypes("com.google.gson.codegen.GeneratedTypeAdapter")
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 public final class GeneratedTypeAdapterProcessor extends AbstractProcessor {
   @Override public boolean process(Set<? extends TypeElement> types, RoundEnvironment env) {
-    System.out.println("invoked GeneratedTypeAdapterProcessor");
+    Logger logger = Logger.getLogger(this.getClass().getSimpleName());// Create a Logger
+    logger.log(Level.INFO, "invoked GeneratedTypeAdapterProcessor");
     try {
       for (Element element : env.getElementsAnnotatedWith(GeneratedTypeAdapter.class)) {
         writeAdapter((TypeElement) element);
